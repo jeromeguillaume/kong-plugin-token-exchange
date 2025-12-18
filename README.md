@@ -31,7 +31,7 @@ The main capabilities are:
         - **Service app** (supporting the token exchange)
     - Create users for AuthZ code flow:
         - Open the menu: Directory/People
-        - Create 2 users and replace `first.last` by your real firstname, lastname and domain name:
+        - Create 2 users and replace first, last and konghq.com by your real firstname, lastname and domain name:
             - first.last@konghq.com
             - first.last+mcp@konghq.com
 3) Other Okta configuration for `OpenId Connect` plugin:
@@ -58,7 +58,7 @@ The main capabilities are:
             - Replace `https://integrator-YOUR-ID.okta.com/oauth2/default/v1/token` by your Okta token endpoint
         - For `Consumers`:
             - Replace first.last@konghq.com and first.last+mcp@konghq.com by your real firstname, lastname and domain name
-    - Execute decK:
+    - Execute decK (command line for Kong EE):
     ```shell
     `deck gateway sync --kong-addr=http://localhost:9002 --select-tag okta-token-exchange ./okta-token-exchange.yaml`
     ```
@@ -68,7 +68,7 @@ The main capabilities are:
     
 6) Test the Kong routes with a Client credentials grant
     - Call `/httpbinOkta` and provide an `Authorization:Basic` by using the client_id/client_secret of the **Native app integration**
-        - Copy/Paste the **input** token from `Authorization:Bearer` in the Response Body
+        - Copy/Paste the **input** token from `Authorization:Bearer` in the **Response** Body
     - Call `/httpbinExchangeOkta` and put the **input** token in `Authorization:Bearer`
         - The **output** token can be seen in:
             - `Authorization:Bearer`: Rsponse Body
@@ -90,7 +90,18 @@ The main capabilities are:
 
 ## Recommendation
 - For `AI MCP Proxy` plugin:
-    - By enabling `bypasss_process_if_no_input_token` the token exchange call itself is not executed when there is no input token during initialization phase (of AuthZ code flow)
+    - By enabling `bypasss_process_if_no_input_token` the token exchange call itself is not executed when there is no input token during the initialization phase (of AuthZ code flow)
+    - Add a `pre-function` for storing the `Authorization:Bearer` that is removed by `AI MCP Proxy` plugin (v3.12 and v3.13)
+    ```yaml
+    - name: pre-function
+      config:
+        access:
+        - local mcp_auth = kong.request.get_header("authorization")          
+          if mcp_auth then
+              kong.service.request.set_header("X-Internal-MCP-AuthZ", mcp_auth)
+          end
+    ```
+    - Configure `client_input_token_header`=`X-Internal-MCP-AuthZ`
 
 ## `token-exchange` plugin configuration reference
 |FORM PARAMETER                 |DEFAULT          |DESCRIPTION                                                 |
