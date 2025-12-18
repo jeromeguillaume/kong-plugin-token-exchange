@@ -1,0 +1,138 @@
+_format_version: "3.0"
+_info:
+  defaults: {}
+  select_tags:
+  - okta-token-exchange
+consumers:
+- acls:
+  - group: prod-env
+    tags:
+    - okta-token-exchange
+  tags:
+  - okta-token-exchange
+  username: first.last+mcp@konghq.com
+- acls:
+  - group: prod-env
+    tags:
+    - okta-token-exchange
+  tags:
+  - okta-token-exchange
+  username: first.last@konghq.com
+- acls:
+  - group: prod-env
+    tags:
+    - okta-token-exchange
+  custom_id: native_app_client_id
+  tags:
+  - okta-token-exchange
+  username: okta-native-app
+- acls:
+  - group: prod-env
+    tags:
+    - okta-token-exchange
+  custom_id: service_app_client_id
+  tags:
+  - okta-token-exchange
+  username: okta-service-app
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: httpbin.apim.eu
+  name: httpbinOkta-svc
+  path: /anything
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    name: httpbinExchangeOkta-route
+    path_handling: v0
+    paths:
+    - /httpbinExchangeOkta
+    plugins:
+    - config:
+        bypasss_process_if_no_input_token: true
+        cache_TTL: 300
+        client_id: service_app_client_id
+        client_input_token_header: Authorization:Bearer
+        client_secret: service_app_client_secret
+        consumer_by:
+        - username
+        - custom_id
+        consumer_claim:
+        - cid
+        consumer_optional: true
+        downstream_output_token_header: X-Token-Exchange
+        param_name_for_input_token: subject_token
+        param_value_audience: api://default
+        param_value_grant_type: urn:ietf:params:oauth:grant-type:token-exchange
+        param_value_scope: api:access:read api:access:write
+        param_value_subject_token_type: urn:ietf:params:oauth:token-type:access_token
+        param_z_others: {}
+        token_endpoint: https://integrator-YOUR-ID.okta.com/oauth2/default/v1/token
+        token_endpoint_auth_method: client_secret_basic
+        upstream_output_token_header: Authorization:Bearer
+      enabled: true
+      name: token-exchange
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - okta-token-exchange
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - okta-token-exchange
+  - https_redirect_status_code: 426
+    name: httpbinOkta-route
+    path_handling: v0
+    paths:
+    - /httpbinOkta
+    plugins:
+    - config:
+        auth_methods:
+        - introspection
+        - client_credentials
+        client_id:
+        - native_app_client_id
+        client_secret:
+        - native_app_client_secret
+        consumer_by:
+        - username
+        - custom_id
+        consumer_claim:
+        - sub
+        issuer: https://integrator-YOUR-ID.okta.com/oauth2/default/v1/token
+        scopes:
+        - kong-scope
+      enabled: true
+      name: openid-connect
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - okta-token-exchange
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - okta-token-exchange
+  tags:
+  - okta-token-exchange
+  write_timeout: 60000
