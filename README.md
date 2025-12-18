@@ -89,7 +89,7 @@ The main capabilities are:
     - Open https://jwt.io and see the `sub` claim with the user name
 
 ## Recommendation
-- Get a token exchange directly from the Okta OAuth2 server
+- Execute a `curl` command for getting a token exchange directly from the Okta OAuth2 server
   - Replace `service_app_client_id`, `service_app_client_secret`, `***YOUR_INPUT_TOKEN***` and `integrator-YOUR-ID.okta.com` by the right values
   ```shell
   curl --request POST \
