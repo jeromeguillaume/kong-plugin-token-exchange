@@ -138,6 +138,3 @@ The main capabilities are:
 |token_endpoint_auth_method|client_secret_basic|The default authentication method is `client_secret_basic` (using `Authorization: Basic` header) for calling the token endpoint|
 |upstream_output_token_header|Authorization:Bearer|The request upstream input token header|
 |token_endpoint|N/A|URL OAuth2 token endpoint|
-
-## Known limitations
-- The search for `Bearer` in `Authorization:Bearer` (`config.client_input_token_header`) is case sensitive

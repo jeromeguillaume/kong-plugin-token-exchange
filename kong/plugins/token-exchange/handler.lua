@@ -133,9 +133,10 @@ function plugin:access(plugin_conf)
   -- If we found an Authorization Header
   if authorization_header ~= nil then
     -- Try to find a 2nd part in the Header value (for instance: 'Bearer')
-    entries = utils.split(authorization_header, client_authorization_header_part2)
-    if #entries == 2 then
-      bearer_token = entries[2]
+    local j = string.lower(authorization_header):find(string.lower(client_authorization_header_part2), 1)
+
+    if j then
+      bearer_token = string.sub(authorization_header, j + #client_authorization_header_part2, #authorization_header)
     else
       bearer_token = authorization_header
     end
@@ -152,7 +153,7 @@ function plugin:access(plugin_conf)
       errMsg = "Unable to find the bearer token from '"..(client_authorization_header or 'nil').."' header"
     end
   end
-  
+
   if not errMsg then
     
     local bearer_token_key = hash_key(bearer_token)
